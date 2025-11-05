@@ -1,0 +1,2 @@
+# windsurf-workshop
+AI Sweden
