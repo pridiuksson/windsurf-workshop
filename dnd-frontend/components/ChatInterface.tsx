@@ -9,9 +9,11 @@ interface ChatInterfaceProps {
   messages: Message[];
   currentPlayerId?: string;
   onSendMessage: (content: string) => void;
+  disabled?: boolean;
+  placeholder?: string;
 }
 
-export default function ChatInterface({ messages, currentPlayerId, onSendMessage }: ChatInterfaceProps) {
+export default function ChatInterface({ messages, currentPlayerId, onSendMessage, disabled = false, placeholder = "Type your message..." }: ChatInterfaceProps) {
   const [messageInput, setMessageInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -52,12 +54,13 @@ export default function ChatInterface({ messages, currentPlayerId, onSendMessage
             type="text"
             value={messageInput}
             onChange={(e) => setMessageInput(e.target.value)}
-            placeholder="Type your message..."
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black placeholder:text-gray-500"
+            placeholder={placeholder}
+            disabled={disabled}
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black placeholder:text-gray-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
           />
           <button
             type="submit"
-            disabled={!messageInput.trim()}
+            disabled={!messageInput.trim() || disabled}
             className="px-6 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
           >
             <span className="hidden sm:inline">Send</span>

@@ -10,6 +10,7 @@ export function useGame() {
   const [currentPlayer, setCurrentPlayer] = useState<Player | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
+  const [gameStarted, setGameStarted] = useState(false);
 
   // Initialize with welcome message
   useEffect(() => {
@@ -25,6 +26,76 @@ export function useGame() {
     };
     setMessages([welcomeMessage]);
   }, []);
+
+  // Call Dungeon Master API
+  const callDungeonMaster = async (action: string, playerAction?: string) => {
+    try {
+      setLoading(true);
+      
+      const response = await fetch('/api/dm/process', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action,
+          game_state: {
+            players: players.filter(p => p !== null),
+            current_scene: gameStarted ? "Adventure in progress" : "Starting area",
+            session_id: "game-1"
+          },
+          player_action: playerAction,
+          player_data: currentPlayer
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (data.success && data.response) {
+        const dmMessage: Message = {
+          id: `dm-${Date.now()}`,
+          game_id: "game-1",
+          content: data.response.content,
+          message_type: "dungeon_master",
+          is_private: false,
+          metadata: JSON.stringify({
+            type: data.response.type,
+            sound_effects: data.response.sound_effects || [],
+            visual_effects: data.response.visual_effects || []
+          }),
+          created_at: new Date().toISOString(),
+          player_name: "Dungeon Master"
+        };
+        
+        setMessages(prev => [...prev, dmMessage]);
+        
+        // Update game state if provided
+        if (data.response.game_state_updates) {
+          // Handle any game state updates here
+          if (data.response.game_state_updates.last_action === 'start_adventure') {
+            setGameStarted(true);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error calling Dungeon Master:', error);
+      
+      // Add error message
+      const errorMessage: Message = {
+        id: `error-${Date.now()}`,
+        game_id: "game-1",
+        content: "The Dungeon Master seems to be busy... Try again in a moment!",
+        message_type: "system",
+        is_private: false,
+        metadata: "{}",
+        created_at: new Date().toISOString()
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Handle joining a slot
   const handleJoinSlot = async (slotNumber: number) => {
@@ -50,6 +121,9 @@ export function useGame() {
         gold: 50,
         inventory: "[]",
         spells: "[]",
+        device_id: `device-${Date.now()}`,
+        last_active: new Date().toISOString(),
+        is_online: true,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
@@ -82,6 +156,14 @@ export function useGame() {
       };
       setMessages(prev => [...prev, joinMessage]);
 
+      // Start adventure if this is the first player
+      const activePlayers = newPlayers.filter(p => p !== null);
+      if (activePlayers.length === 1 && !gameStarted) {
+        setTimeout(() => {
+          callDungeonMaster('start_adventure');
+        }, 1000);
+      }
+
     } catch (error) {
       console.error('Error joining slot:', error);
     } finally {
@@ -93,40 +175,30 @@ export function useGame() {
   const handleSendMessage = async (content: string) => {
     if (!currentPlayer) return;
 
-    setLoading(true);
-    try {
-      const newMessage: Message = {
-        id: `msg-${Date.now()}`,
-        game_id: "game-1",
-        player_id: currentPlayer.id,
-        content,
-        message_type: "player",
-        is_private: false,
-        metadata: "{}",
-        created_at: new Date().toISOString(),
-        player_name: currentPlayer.name,
-        character_name: currentPlayer.character_name
-      };
+    // Add player message
+    const newMessage: Message = {
+      id: `msg-${Date.now()}`,
+      game_id: "game-1",
+      player_id: currentPlayer.id,
+      content,
+      message_type: "player",
+      is_private: false,
+      metadata: "{}",
+      created_at: new Date().toISOString(),
+      player_name: currentPlayer.name,
+      character_name: currentPlayer.character_name
+    };
 
-      // Save to database
-      const { data, error } = await supabase
-        .from('messages')
-        .insert([newMessage])
-        .select()
-        .single();
+    setMessages(prev => [...prev, newMessage]);
 
-      if (error) throw error;
+    // Call Dungeon Master to respond
+    await callDungeonMaster('player_action', content);
+  };
 
-      // Update local state
-      setMessages(prev => [...prev, data]);
-
-      // TODO: Send to AI service for DM response
-      // await sendToAIService(content);
-
-    } catch (error) {
-      console.error('Error sending message:', error);
-    } finally {
-      setLoading(false);
+  // Start the adventure manually
+  const startAdventure = async () => {
+    if (!gameStarted && players.some(p => p !== null)) {
+      await callDungeonMaster('start_adventure');
     }
   };
 
@@ -136,7 +208,9 @@ export function useGame() {
     currentPlayer,
     messages,
     loading,
+    gameStarted,
     handleJoinSlot,
-    handleSendMessage
+    handleSendMessage,
+    startAdventure
   };
 }

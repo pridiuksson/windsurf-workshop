@@ -14,6 +14,9 @@ Based on our deployment attempts, here's what needs to be completed:
    - `NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key`
 3. Add them to Vercel project settings
+4. **NEW**: Add Gemini API key for Dungeon Master:
+   - Get API key from [Google AI Studio](https://aistudio.google.com/app/apikey)
+   - Add `GEMINI_API_KEY=your_gemini_key` to Vercel environment
 
 ### 🗄️ Database Setup
 
@@ -27,11 +30,21 @@ Based on our deployment attempts, here's what needs to be completed:
 
 ### 🤖 AI Service Deployment
 
-**Current Status**: AI service works locally but needs deployment.
+**Current Status**: ✅ **COMPLETED** - Dungeon Master integrated using Gemini Flash AI
 
-**Options**:
-- **Easiest**: Move AI routes into `dnd-frontend/app/api/`
-- **Separate**: Deploy `ai-dungeon-master` to Railway/Render
+**What's implemented**:
+- **Gemini Flash API**: Integrated for AI Dungeon Master responses
+- **API Route**: `/api/dm/process` handles all DM interactions
+- **Prompt Engineering**: D&D-specific prompts for immersive gameplay
+- **Response Types**: Narrative, combat, dialogue, and system messages
+- **Error Handling**: Fallback responses if AI service fails
+
+**Features**:
+- Dynamic story generation based on player actions
+- Context-aware responses (player class, health, game state)
+- Sound and visual effect suggestions
+- Combat encounter management
+- NPC dialogue handling
 
 ### 🔄 Real-time Features
 
@@ -174,8 +187,24 @@ database/
 - [ ] Database created and accessible
 - [ ] Players can join games
 - [ ] Chat messages work in real-time
-- [ ] AI Dungeon Master responds
+- [ ] ✅ AI Dungeon Master responds (Gemini Flash integrated)
 - [ ] 4 players can play simultaneously
+
+## 🎮 New Features Added
+
+### ✅ AI Dungeon Master (Gemini Flash)
+- **Dynamic Storytelling**: AI generates immersive D&D narratives
+- **Player Context**: Responses adapt to player class, level, and actions
+- **Combat Management**: AI handles combat encounters and descriptions
+- **NPC Interactions**: Dynamic dialogue for non-player characters
+- **Sound/Visual Effects**: AI suggests atmospheric effects
+- **Error Recovery**: Fallback responses if AI service fails
+
+### 🎯 Enhanced Gameplay
+- **Start Adventure Button**: Players can begin the adventure when ready
+- **Smart Chat**: Disabled state until game starts
+- **Contextual Prompts**: Dynamic placeholders guide player actions
+- **Loading States**: Visual feedback during AI responses
 
 ---
 

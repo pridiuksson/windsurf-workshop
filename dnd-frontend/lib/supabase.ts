@@ -24,6 +24,9 @@ interface Database {
           gold: number;
           inventory: string;
           spells: string;
+          device_id: string;
+          last_active: string;
+          is_online: boolean;
           created_at: string;
           updated_at: string;
         };
