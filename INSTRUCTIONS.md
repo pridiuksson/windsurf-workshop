@@ -6,17 +6,31 @@ Based on our deployment attempts, here's what needs to be completed:
 
 ### ⚠️ CRITICAL: Environment Variables Setup
 
-**Problem**: Vercel deployment failed because Supabase environment variables are missing.
+**Problem**: Vercel deployment failed because environment variables are missing.
 
-**What needs to be done**:
-1. Create Supabase project
-2. Get these credentials:
-   - `NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key`
-3. Add them to Vercel project settings
-4. **NEW**: Add Gemini API key for Dungeon Master:
-   - Get API key from [Google AI Studio](https://aistudio.google.com/app/apikey)
-   - Add `GEMINI_API_KEY=your_gemini_key` to Vercel environment
+**REQUIRED ENVIRONMENT VARIABLES FOR VERCEL:**
+
+Go to **Vercel Dashboard** → Your Project → **Settings** → **Environment Variables** and add ALL of these:
+
+```bash
+# Supabase Database Connection
+NEXT_PUBLIC_SUPABASE_URL=https://rogqkxluhgaqztalxkgg.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZ3FreGx1aGdhcXp0YWx4a2dnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIzNjc4MjgsImV4cCI6MjA3Nzk0MzgyOH0.283FBJQDvcnHmeed0ilYqUo7puv_EeE8JlpplWJCQ1M
+
+# AI Dungeon Master (Gemini Flash)
+GEMINI_API_KEY=your_gemini_api_key_here
+
+# Optional: AI Service URL
+NEXT_PUBLIC_AI_SERVICE_URL=https://your-app.vercel.app/api
+```
+
+**🔑 Get Your Gemini API Key:**
+1. Visit [Google AI Studio](https://aistudio.google.com/app/apikey)
+2. Click **"Create API Key"**
+3. Copy the key (starts with `AIza...`)
+4. Add it as `GEMINI_API_KEY` in Vercel
+
+**⚠️ DEPLOYMENT WILL FAIL WITHOUT THESE VARIABLES!**
 
 ### 🗄️ Database Setup
 
@@ -57,74 +71,30 @@ Based on our deployment attempts, here's what needs to be completed:
 
 ## 🚀 Quick Deployment Steps
 
-### Step 1: Create Supabase Project (5 mins)
-```bash
-# 1. Go to supabase.com → New Project
-# 2. Note down: Project URL + anon key
-# 3. Run this SQL in Supabase SQL Editor:
-CREATE TABLE players (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT NOT NULL,
-  character_name TEXT NOT NULL,
-  class TEXT NOT NULL CHECK (class IN ('Warrior', 'Mage', 'Rogue', 'Cleric', 'Paladin', 'Ranger', 'Bard', 'Druid')),
-  level INTEGER DEFAULT 1,
-  health INTEGER DEFAULT 100,
-  max_health INTEGER DEFAULT 100,
-  mana INTEGER DEFAULT 20,
-  max_mana INTEGER DEFAULT 20,
-  strength INTEGER DEFAULT 10,
-  dexterity INTEGER DEFAULT 10,
-  intelligence INTEGER DEFAULT 10,
-  wisdom INTEGER DEFAULT 10,
-  charisma INTEGER DEFAULT 10,
-  experience_points INTEGER DEFAULT 0,
-  gold INTEGER DEFAULT 50,
-  inventory TEXT DEFAULT '[]',
-  spells TEXT DEFAULT '[]',
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
-);
+### Step 1: Add Environment Variables to Vercel (5 mins) - **REQUIRED FIRST!**
 
-CREATE TABLE messages (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  game_id TEXT NOT NULL,
-  player_id UUID REFERENCES players(id),
-  content TEXT NOT NULL,
-  message_type TEXT NOT NULL CHECK (message_type IN ('player', 'dungeon_master', 'system')),
-  is_private BOOLEAN DEFAULT FALSE,
-  metadata TEXT DEFAULT '{}',
-  created_at TIMESTAMP DEFAULT NOW(),
-  player_name TEXT,
-  character_name TEXT
-);
-
--- Enable RLS
-ALTER TABLE players ENABLE ROW LEVEL SECURITY;
-ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
-```
+1. Go to **Vercel Dashboard** → Your Project → **Settings** → **Environment Variables**
+2. Add these **EXACT** variables:
+   ```bash
+   NEXT_PUBLIC_SUPABASE_URL=https://rogqkxluhgaqztalxkgg.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZ3FreGx1aGdhcXp0YWx4a2dnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIzNjc4MjgsImV4cCI6MjA3Nzk0MzgyOH0.283FBJQDvcnHmeed0ilYqUo7puv_EeE8JlpplWJCQ1M
+   GEMINI_API_KEY=your_actual_gemini_key_here
+   ```
+3. **Get Gemini Key**: [Google AI Studio](https://aistudio.google.com/app/apikey)
+4. Click **Save** ✅
 
 ### Step 2: Deploy Frontend (2 mins)
 ```bash
 cd dnd-frontend
 vercel --prod
-# Add environment variables when prompted
 ```
 
-### Step 3: Choose AI Service Option
-
-**Option A - Easiest (5 mins)**:
-```bash
-# Move AI logic to frontend API routes
-mkdir -p dnd-frontend/app/api/dm
-# Copy AI service logic to app/api/dm/process/route.ts
-```
-
-**Option B - Separate Service (10 mins)**:
-```bash
-cd ai-dungeon-master
-railway up
-# Add OPENAI_API_KEY to Railway env vars
-```
+### Step 3: Test the Deployment (2 mins)
+1. Visit your Vercel URL
+2. **Join a player slot**
+3. **Click "Start Adventure"**
+4. **Send a message** like "I look around the room"
+5. **Should see AI Dungeon Master respond!** 🎲
 
 ## 🧪 Test Everything Works
 
@@ -176,10 +146,27 @@ database/
 
 ## 🚨 Known Issues
 
-1. **Environment Variables**: Missing Supabase credentials
-2. **Real-time**: WebSocket connections not tested
-3. **AI Service**: Needs deployment strategy
-4. **Database**: No live project exists yet
+1. **Environment Variables**: ⚠️ **CRITICAL** - Must add ALL 3 variables to Vercel
+   - `NEXT_PUBLIC_SUPABASE_URL` (provided above)
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` (provided above)  
+   - `GEMINI_API_KEY` (get from Google AI Studio)
+   - **Deployment will fail without these!**
+
+2. **Real-time**: WebSocket connections not tested yet
+3. **Database**: Using existing Supabase project - should work
+4. **AI Service**: ✅ **COMPLETED** - Gemini Flash integrated
+
+## ⚠️ DEPLOYMENT CHECKLIST
+
+Before deploying to Vercel, ensure you have:
+
+- [ ] Added `NEXT_PUBLIC_SUPABASE_URL` to Vercel environment variables
+- [ ] Added `NEXT_PUBLIC_SUPABASE_ANON_KEY` to Vercel environment variables  
+- [ ] Added `GEMINI_API_KEY` to Vercel environment variables
+- [ ] Saved all environment variables in Vercel dashboard
+- [ ] Run `vercel --prod` from dnd-frontend directory
+
+**If deployment fails, check environment variables first!**
 
 ## ✅ Success Criteria
 
