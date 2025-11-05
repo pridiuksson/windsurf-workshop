@@ -3,7 +3,7 @@
 
 -- Players table
 CREATE TABLE players (
-    id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
+    id VARCHAR(36) PRIMARY KEY DEFAULT (gen_random_uuid()),
     name VARCHAR(100) NOT NULL,
     character_name VARCHAR(100) NOT NULL,
     class VARCHAR(50) NOT NULL,
@@ -27,7 +27,7 @@ CREATE TABLE players (
 
 -- Games table
 CREATE TABLE games (
-    id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
+    id VARCHAR(36) PRIMARY KEY DEFAULT (gen_random_uuid()),
     name VARCHAR(200) NOT NULL,
     description TEXT,
     status VARCHAR(20) DEFAULT 'waiting' CHECK (status IN ('waiting', 'in_progress', 'completed', 'paused')),
@@ -40,7 +40,7 @@ CREATE TABLE games (
 
 -- Game_players junction table
 CREATE TABLE game_players (
-    id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
+    id VARCHAR(36) PRIMARY KEY DEFAULT (gen_random_uuid()),
     game_id VARCHAR(36) NOT NULL,
     player_id VARCHAR(36) NOT NULL,
     joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -51,7 +51,7 @@ CREATE TABLE game_players (
 
 -- Messages table for chat
 CREATE TABLE messages (
-    id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
+    id VARCHAR(36) PRIMARY KEY DEFAULT (gen_random_uuid()),
     game_id VARCHAR(36) NOT NULL,
     player_id VARCHAR(36),
     content TEXT NOT NULL,
@@ -65,7 +65,7 @@ CREATE TABLE messages (
 
 -- Game_sessions table for tracking game state
 CREATE TABLE game_sessions (
-    id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
+    id VARCHAR(36) PRIMARY KEY DEFAULT (gen_random_uuid()),
     game_id VARCHAR(36) NOT NULL,
     session_data TEXT DEFAULT '{}',
     current_scene TEXT,
@@ -77,7 +77,7 @@ CREATE TABLE game_sessions (
 
 -- Characters table (alternative to players table for more flexibility)
 CREATE TABLE characters (
-    id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
+    id VARCHAR(36) PRIMARY KEY DEFAULT (gen_random_uuid()),
     player_id VARCHAR(36),
     game_id VARCHAR(36),
     name VARCHAR(100) NOT NULL,

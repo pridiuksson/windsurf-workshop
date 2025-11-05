@@ -176,24 +176,13 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- PostgreSQL specific indexes for performance
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_players_class_level ON players(class, level);
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_games_status_created ON games(status, created_at);
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_messages_game_type ON messages(game_id, message_type);
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_characters_game_class ON characters(game_id, class);
+CREATE INDEX IF NOT EXISTS idx_players_class_level ON players(class, level);
+CREATE INDEX IF NOT EXISTS idx_games_status_created ON games(status, created_at);
+CREATE INDEX IF NOT EXISTS idx_messages_game_type ON messages(game_id, message_type);
+CREATE INDEX IF NOT EXISTS idx_characters_game_class ON characters(game_id, class);
 
--- PostgreSQL specific constraints
-ALTER TABLE games ADD CONSTRAINT check_max_players 
-    CHECK (max_players > 0 AND max_players <= 10);
-
-ALTER TABLE players ADD CONSTRAINT check_health_positive 
-    CHECK (health > 0 AND health <= max_health);
-
-ALTER TABLE players ADD CONSTRAINT check_mana_valid 
-    CHECK (mana >= 0 AND mana <= max_mana);
-
-ALTER TABLE players ADD CONSTRAINT check_attributes_positive 
-    CHECK (strength > 0 AND dexterity > 0 AND intelligence > 0 
-           AND wisdom > 0 AND charisma > 0);
+-- Note: Basic constraints already created in initial schema
+-- Additional constraints would be added here if needed
 
 -- PostgreSQL specific extensions if needed
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

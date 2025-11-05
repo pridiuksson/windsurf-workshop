@@ -1,5 +1,4 @@
 -- Standard SQL views for the chatbot game
--- Each view separated by GO statement for batch processing
 
 -- View for game summary with player counts
 CREATE VIEW game_summary AS
@@ -15,7 +14,6 @@ FROM games g
 LEFT JOIN game_players gp ON g.id = gp.game_id
 LEFT JOIN players p ON g.dungeon_master_id = p.id
 GROUP BY g.id, g.name, g.status, g.created_at, g.max_players, p.name;
-GO
 
 -- View for player characters with game info
 CREATE VIEW player_characters AS
@@ -32,7 +30,6 @@ FROM players p
 LEFT JOIN characters c ON p.id = c.player_id
 LEFT JOIN games g ON c.game_id = g.id
 WHERE c.id IS NOT NULL;
-GO
 
 -- View for active games with current player counts
 CREATE VIEW active_games AS
@@ -43,7 +40,6 @@ FROM games g
 LEFT JOIN game_players gp ON g.id = gp.game_id
 WHERE g.status = 'in_progress'
 GROUP BY g.id, g.name, g.description, g.status, g.dungeon_master_id, g.max_players, g.created_at, g.updated_at;
-GO
 
 -- View for game messages with player details
 CREATE VIEW game_messages AS
@@ -54,7 +50,6 @@ SELECT
 FROM messages m
 LEFT JOIN players p ON m.player_id = p.id
 ORDER BY m.created_at DESC;
-GO
 
 -- Additional indexes for performance
 CREATE INDEX idx_players_class ON players(class);
