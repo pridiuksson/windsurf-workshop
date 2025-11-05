@@ -13,7 +13,7 @@ A multiplayer Dungeons & Dragons chat game where 4 players connect and play agai
 
 ## 🏗️ Architecture
 
-- **Frontend**: Next.js 14 + TypeScript + TailwindCSS
+- **Frontend**: Next.js 16 + TypeScript + TailwindCSS
 - **Backend**: Supabase (PostgreSQL + Realtime + Auth)
 - **AI Service**: Node.js + Express + OpenAI GPT-4
 - **Database**: PostgreSQL with Row Level Security
@@ -21,11 +21,14 @@ A multiplayer Dungeons & Dragons chat game where 4 players connect and play agai
 ## 📁 Project Structure
 
 ```
+Windsurf-workshop/
 ├── database/              # Supabase database setup
-├── frontend/              # Next.js frontend application
+├── dnd-frontend/          # Next.js frontend application
 ├── ai-dungeon-master/     # AI Dungeon Master service
 ├── shared/                # Shared types and utilities
-└── agents.md             # Team documentation
+├── frontend-archived/     # Previous frontend (archived)
+├── agents.md             # Team documentation
+└── README.md             # Project overview
 ```
 
 ## 🚀 Quick Start
@@ -54,10 +57,9 @@ supabase db push
 
 3. **Set up the frontend**
 ```bash
-cd frontend
+cd dnd-frontend
 npm install
-cp .env.example .env.local
-# Add your Supabase credentials to .env.local
+# Create .env.local with your Supabase credentials
 npm run dev
 ```
 
@@ -85,12 +87,12 @@ npm run dev
 - **Game Designer**: Game mechanics and content
 
 ### Key Technologies
-- **Next.js 14**: React framework with App Router
+- **Next.js 16**: React framework with App Router
 - **Supabase**: Backend-as-a-Service with real-time capabilities
 - **OpenAI GPT-4**: AI Dungeon Master
 - **TypeScript**: Type-safe development
 - **TailwindCSS**: Utility-first styling
-- **Zustand**: Lightweight state management
+- **Lucide React**: Modern icon library
 
 ## 📚 Documentation
 

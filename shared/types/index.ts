@@ -5,7 +5,7 @@ export interface Player {
   id: string;
   name: string;
   character_name: string;
-  class: PlayerClass;
+  class: 'Warrior' | 'Mage' | 'Rogue' | 'Cleric' | 'Paladin' | 'Ranger' | 'Bard' | 'Druid';
   level: number;
   health: number;
   max_health: number;
@@ -24,13 +24,31 @@ export interface Player {
   updated_at: string;
 }
 
+export interface Message {
+  id: string;
+  game_id: string;
+  player_id?: string;
+  content: string;
+  message_type: 'player' | 'dungeon_master' | 'system';
+  is_private: boolean;
+  metadata: string; // JSON string
+  created_at: string;
+  player_name?: string;
+  character_name?: string;
+}
+
+export interface GameSlot {
+  slotNumber: number;
+  player?: Player | null;
+  isOccupied: boolean;
+}
+
 export interface Game {
   id: string;
   name: string;
   description?: string;
-  status: GameStatus;
-  dungeon_master_id?: string;
   max_players: number;
+  status: 'waiting' | 'active' | 'completed';
   created_at: string;
   updated_at: string;
 }
@@ -42,88 +60,6 @@ export interface GamePlayer {
   joined_at: string;
 }
 
-export interface Message {
-  id: string;
-  game_id: string;
-  player_id?: string;
-  content: string;
-  message_type: MessageType;
-  is_private: boolean;
-  metadata: string; // JSON string
-  created_at: string;
-}
-
-export interface GameSession {
-  id: string;
-  game_id: string;
-  session_data: string; // JSON string
-  current_scene?: string;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Character {
-  id: string;
-  player_id?: string;
-  game_id?: string;
-  name: string;
-  class: PlayerClass;
-  level: number;
-  health: number;
-  max_health: number;
-  mana: number;
-  max_mana: number;
-  strength: number;
-  dexterity: number;
-  intelligence: number;
-  wisdom: number;
-  charisma: number;
-  experience_points: number;
-  gold: number;
-  inventory: string; // JSON string
-  spells: string; // JSON string
-  abilities: string; // JSON string
-  background?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-// Enums
-export type PlayerClass = 'Warrior' | 'Mage' | 'Rogue' | 'Cleric' | 'Paladin' | 'Ranger' | 'Bard' | 'Druid';
-export type GameStatus = 'waiting' | 'in_progress' | 'completed' | 'paused';
-export type MessageType = 'player' | 'dungeon_master' | 'system';
-
-// Parsed JSON types
-export interface InventoryItem {
-  id: string;
-  name: string;
-  type: 'weapon' | 'armor' | 'consumable' | 'misc';
-  value: number;
-  quantity: number;
-  properties?: Record<string, any>;
-}
-
-export interface Spell {
-  id: string;
-  name: string;
-  level: number;
-  mana_cost: number;
-  description: string;
-  damage?: number;
-  healing?: number;
-  effects?: string[];
-}
-
-export interface Ability {
-  id: string;
-  name: string;
-  description: string;
-  cooldown?: number;
-  last_used?: string;
-}
-
-// Game State Types
 export interface GameState {
   scene: string;
   npcs: NPC[];
@@ -132,6 +68,21 @@ export interface GameState {
   turn_order: TurnOrder[];
   current_turn: string;
   round_number: number;
+}
+
+export interface Character extends Player {
+  background?: string;
+  abilities: string[]; // JSON string
+  equipment: string[]; // JSON string
+}
+
+export interface GameSession {
+  id: string;
+  game_id: string;
+  session_data: string; // JSON string of GameState
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface NPC {
@@ -163,7 +114,7 @@ export interface Attack {
 
 export interface LootTable {
   gold: { min: number; max: number };
-  items: InventoryItem[];
+  items: any[]; // JSON array
   experience: number;
 }
 
@@ -182,7 +133,13 @@ export interface TurnOrder {
   name: string;
 }
 
-// API Request/Response Types
+export type PlayerClass = 'Warrior' | 'Mage' | 'Rogue' | 'Cleric' | 'Paladin' | 'Ranger' | 'Bard' | 'Druid';
+export type MessageType = 'player' | 'dungeon_master' | 'system';
+export type GameStatus = 'waiting' | 'active' | 'completed';
+export type NPCAttitude = 'friendly' | 'neutral' | 'hostile';
+export type AttackType = 'melee' | 'ranged' | 'magic';
+export type EnvironmentLighting = 'bright' | 'dim' | 'dark';
+
 export interface CreateGameData {
   name: string;
   description?: string;
@@ -197,7 +154,7 @@ export interface CreatePlayerData {
 
 export interface JoinGameData {
   game_id: string;
-  character_name?: string;
+  player_data: CreatePlayerData;
 }
 
 export interface SendMessageData {
@@ -207,16 +164,6 @@ export interface SendMessageData {
   target_player_id?: string;
 }
 
-export interface UpdateCharacterData {
-  health?: number;
-  mana?: number;
-  experience_points?: number;
-  gold?: number;
-  inventory?: InventoryItem[];
-  spells?: Spell[];
-}
-
-// AI Dungeon Master Types
 export interface DMRequest {
   action: 'generate_scene' | 'process_action' | 'create_npc' | 'generate_combat' | 'respond_to_player';
   game_state: GameState;
@@ -234,58 +181,31 @@ export interface DMResponse {
   visual_effects?: string[];
 }
 
-// Real-time Event Types
-export interface RealtimeEvent<T = any> {
-  type: 'message' | 'player_join' | 'player_leave' | 'game_state_update' | 'character_update';
-  data: T;
-  game_id: string;
-  timestamp: string;
-}
-
-export interface MessageEvent extends RealtimeEvent<Message> {
+export interface MessageEvent {
   type: 'message';
+  data: Message;
+  game_id: string;
 }
 
-export interface PlayerJoinEvent extends RealtimeEvent<GamePlayer> {
-  type: 'player_join';
-}
-
-export interface PlayerLeaveEvent extends RealtimeEvent<{ player_id: string }> {
-  type: 'player_leave';
-}
-
-export interface GameStateUpdateEvent extends RealtimeEvent<GameState> {
+export interface GameStateUpdateEvent {
   type: 'game_state_update';
+  data: GameState;
+  game_id: string;
 }
 
-export interface CharacterUpdateEvent extends RealtimeEvent<Character> {
-  type: 'character_update';
+export interface PlayerEvent {
+  type: 'player_join' | 'player_leave';
+  data: GamePlayer | { player_id: string };
+  game_id: string;
 }
 
-// Utility Types
-export interface GameStats {
-  total_games: number;
-  completed_games: number;
-  total_players: number;
-  active_games: number;
-}
-
-export interface PlayerStats {
-  games_played: number;
-  games_completed: number;
-  total_experience: number;
-  highest_level: number;
-  total_gold: number;
-}
-
-// Error Types
 export interface GameError {
   code: string;
   message: string;
   details?: Record<string, any>;
 }
 
-export type ApiResponse<T> = {
+export interface ApiResponse<T> {
   data?: T;
   error?: GameError;
   success: boolean;

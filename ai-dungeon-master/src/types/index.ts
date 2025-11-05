@@ -1,4 +1,4 @@
-// AI Service specific types to avoid shared import issues
+// AI Service specific types
 
 export interface DMRequest {
   action: 'generate_scene' | 'process_action' | 'create_npc' | 'generate_combat' | 'respond_to_player';

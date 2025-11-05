@@ -8,14 +8,14 @@ A multiplayer Dungeons & Dragons chat game where 4 players connect and play agai
 
 ### **Technology Stack**
 
-#### **Frontend (Next.js 14)**
-- **Framework**: Next.js 14 with App Router
+#### **Frontend (Next.js 16)**
+- **Framework**: Next.js 16 with App Router
 - **Language**: TypeScript
-- **Styling**: TailwindCSS with custom fantasy theme
-- **State Management**: Zustand
+- **Styling**: TailwindCSS v4
+- **State Management**: React hooks
 - **Real-time**: Supabase Realtime subscriptions
-- **UI Components**: Headless UI + Heroicons
-- **Animations**: Framer Motion
+- **UI Components**: Custom components with Lucide React icons
+- **Database**: Supabase client integration
 
 #### **Backend (Supabase)**
 - **Database**: PostgreSQL with Row Level Security

@@ -40,7 +40,7 @@ router.post('/backstory', async (req, res) => {
       return res.status(400).json({
         success: false,
         error: {
-          code: 'MISSING_PARAMS',
+          code: 'MISSING_PARAMETERS',
           message: 'characterClass and characterName are required'
         }
       });
@@ -48,16 +48,16 @@ router.post('/backstory', async (req, res) => {
 
     const backstory = await dmService.generateCharacterBackstory(characterClass, characterName);
     
-    res.json({
+    return res.json({
       success: true,
       data: { backstory }
     });
   } catch (error) {
     logger.error('Error generating backstory', { error });
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: {
-        code: 'BACKSTORY_ERROR',
+        code: 'BACKSTORY_GENERATION_FAILED',
         message: 'Failed to generate character backstory'
       }
     });
@@ -67,30 +67,30 @@ router.post('/backstory', async (req, res) => {
 // Generate adventure hook
 router.post('/adventure-hook', async (req, res) => {
   try {
-    const { playerLevel, playerClasses } = req.body;
+    const { level, playerClasses } = req.body;
     
-    if (!playerLevel || !playerClasses) {
+    if (!level || !playerClasses) {
       return res.status(400).json({
         success: false,
         error: {
-          code: 'MISSING_PARAMS',
-          message: 'playerLevel and playerClasses are required'
+          code: 'MISSING_PARAMETERS',
+          message: 'level and playerClasses are required'
         }
       });
     }
 
-    const hook = await dmService.generateAdventureHook(playerLevel, playerClasses);
+    const adventureHook = await dmService.generateAdventureHook(level, playerClasses);
     
-    res.json({
+    return res.json({
       success: true,
-      data: { adventureHook: hook }
+      data: { adventureHook }
     });
   } catch (error) {
     logger.error('Error generating adventure hook', { error });
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: {
-        code: 'ADVENTURE_HOOK_ERROR',
+        code: 'ADVENTURE_HOOK_GENERATION_FAILED',
         message: 'Failed to generate adventure hook'
       }
     });

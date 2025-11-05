@@ -1,93 +1,21 @@
 "use client";
 
-import { useState } from "react";
 import PlayerSlot from "@/components/PlayerSlot";
 import ChatInterface from "@/components/ChatInterface";
 import PlayerStats from "@/components/PlayerStats";
-import { Player, Message } from "@/types/game";
+import { useGame } from "@/hooks/useGame";
 import { Gamepad2 } from "lucide-react";
 
 export default function Home() {
-  const [players, setPlayers] = useState<(Player | null)[]>([null, null, null, null]);
-  const [currentPlayerId, setCurrentPlayerId] = useState<string | undefined>();
-  const [currentPlayer, setCurrentPlayer] = useState<Player | null>(null);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      game_id: "game-1",
-      player_id: undefined,
-      content: "Dragon is waiting for you.",
-      message_type: "dungeon_master",
-      is_private: false,
-      metadata: "{}",
-      created_at: new Date().toISOString(),
-      player_name: "Dungeon Master"
-    }
-  ]);
-
-  // Handle joining a slot
-  const handleJoinSlot = (slotNumber: number) => {
-    const newPlayer: Player = {
-      id: `player-${slotNumber}`,
-      name: `Player ${slotNumber}`,
-      character_name: `Player ${slotNumber}`,
-      class: "Warrior",
-      level: 1,
-      health: 100,
-      max_health: 100,
-      mana: 20,
-      max_mana: 20,
-      strength: 16,
-      dexterity: 12,
-      intelligence: 10,
-      wisdom: 12,
-      charisma: 14,
-      experience_points: 0,
-      gold: 50,
-      inventory: "[]",
-      spells: "[]",
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
-
-    const newPlayers = [...players];
-    newPlayers[slotNumber - 1] = newPlayer;
-    setPlayers(newPlayers);
-    setCurrentPlayerId(newPlayer.id);
-    setCurrentPlayer(newPlayer);
-
-    // Add system message
-    const joinMessage: Message = {
-      id: `msg-${Date.now()}`,
-      game_id: "game-1",
-      content: `${newPlayer.character_name} has joined the game!`,
-      message_type: "system",
-      is_private: false,
-      metadata: "{}",
-      created_at: new Date().toISOString()
-    };
-    setMessages([...messages, joinMessage]);
-  };
-
-  // Handle sending a message
-  const handleSendMessage = (content: string) => {
-    if (!currentPlayer) return;
-
-    const newMessage: Message = {
-      id: `msg-${Date.now()}`,
-      game_id: "game-1",
-      player_id: currentPlayer.id,
-      content,
-      message_type: "player",
-      is_private: false,
-      metadata: "{}",
-      created_at: new Date().toISOString(),
-      player_name: currentPlayer.name,
-      character_name: currentPlayer.character_name
-    };
-
-    setMessages([...messages, newMessage]);
-  };
+  const {
+    players,
+    currentPlayerId,
+    currentPlayer,
+    messages,
+    loading,
+    handleJoinSlot,
+    handleSendMessage
+  } = useGame();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-4">
