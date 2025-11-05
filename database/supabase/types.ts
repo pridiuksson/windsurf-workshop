@@ -1,278 +1,807 @@
-// TypeScript types for the Supabase database schema
-// Updated for standard SQL compatibility
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
 
-export interface Player {
-  id: string;
-  device_id: string; // Unique identifier for the device/browser
-  name: string;
-  character_name: string;
-  class: 'Warrior' | 'Mage' | 'Rogue' | 'Cleric' | 'Paladin' | 'Ranger' | 'Bard' | 'Druid';
-  level: number;
-  health: number;
-  max_health: number;
-  mana: number;
-  max_mana: number;
-  strength: number;
-  dexterity: number;
-  intelligence: number;
-  wisdom: number;
-  charisma: number;
-  experience_points: number;
-  gold: number;
-  inventory: string; // JSON string in standard SQL, can be parsed in application
-  spells: string; // JSON string in standard SQL, can be parsed in application
-  last_active: string; // Track when player was last active
-  is_online: boolean; // Track if player is currently online
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Game {
-  id: string;
-  name: string;
-  description?: string;
-  status: 'waiting' | 'in_progress' | 'completed' | 'paused';
-  dungeon_master_id?: string;
-  max_players: number;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface GamePlayer {
-  id: string;
-  game_id: string;
-  player_id: string;
-  joined_at: string;
-}
-
-export interface Message {
-  id: string;
-  game_id: string;
-  player_id?: string;
-  content: string;
-  message_type: 'player' | 'dungeon_master' | 'system';
-  is_private: boolean;
-  metadata: string; // JSON string in standard SQL, can be parsed in application
-  created_at: string;
-}
-
-export interface GameSession {
-  id: string;
-  game_id: string;
-  session_data: string; // JSON string in standard SQL, can be parsed in application
-  current_scene?: string;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Character {
-  id: string;
-  player_id?: string;
-  game_id?: string;
-  name: string;
-  class: Player['class'];
-  level: number;
-  health: number;
-  max_health: number;
-  mana: number;
-  max_mana: number;
-  strength: number;
-  dexterity: number;
-  intelligence: number;
-  wisdom: number;
-  charisma: number;
-  experience_points: number;
-  gold: number;
-  inventory: string; // JSON string in standard SQL, can be parsed in application
-  spells: string; // JSON string in standard SQL, can be parsed in application
-  abilities: string; // JSON string in standard SQL, can be parsed in application
-  background?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-// Parsed versions of JSON fields for application use
-export interface InventoryItem {
-  id: string;
-  name: string;
-  type: 'weapon' | 'armor' | 'consumable' | 'misc';
-  value: number;
-  quantity: number;
-  properties?: Record<string, any>;
-}
-
-export interface Spell {
-  id: string;
-  name: string;
-  level: number;
-  mana_cost: number;
-  description: string;
-  damage?: number;
-  healing?: number;
-  effects?: string[];
-}
-
-export interface Ability {
-  id: string;
-  name: string;
-  description: string;
-  cooldown?: number;
-  last_used?: string;
-}
-
-export interface GameStats {
-  total_games: number;
-  completed_games: number;
-  total_players: number;
-  active_games: number;
-}
-
-export interface PlayerStats {
-  games_played: number;
-  games_completed: number;
-  total_experience: number;
-  highest_level: number;
-  total_gold: number;
-}
-
-export interface CreateGameData {
-  name: string;
-  description?: string;
-  max_players?: number;
-}
-
-export interface Device {
-  id: string;
-  device_fingerprint: string; // Browser fingerprint
-  user_agent: string;
-  ip_address?: string;
-  last_seen: string;
-  created_at: string;
-}
-
-export interface CreatePlayerData {
-  name: string;
-  character_name: string;
-  class: Player['class'];
-  device_id: string;
-}
-
-export interface JoinGameData {
-  game_id: string;
-  character_name?: string;
-}
-
-export interface SendMessageData {
-  game_id: string;
-  content: string;
-  is_private?: boolean;
-  target_player_id?: string;
-}
-
-export interface UpdateCharacterData {
-  health?: number;
-  mana?: number;
-  experience_points?: number;
-  gold?: number;
-  inventory?: InventoryItem[];
-  spells?: Spell[];
-}
-
-// Database function types (standard SQL versions)
-export interface DatabaseFunctions {
-  is_game_full: (game_uuid: string) => Promise<boolean>;
-  get_player_stats: (player_uuid: string) => Promise<PlayerStats>;
-  add_experience: (player_uuid: string, exp_amount: number) => Promise<boolean>;
-  get_game_messages: (game_uuid: string, page_size?: number, page_number?: number) => Promise<Message[]>;
-  create_game_session: (game_uuid: string, initial_scene?: string) => Promise<string>;
-}
-
-// PostgreSQL-specific function types (for when using PostgreSQL/Supabase)
-export interface PostgreSQLFunctions {
-  is_game_full_pg: (game_uuid: string) => Promise<boolean>;
-  get_player_stats_pg: (player_uuid: string) => Promise<PlayerStats>;
-  add_experience_pg: (player_uuid: string, exp_amount: number) => Promise<boolean>;
-  get_game_messages_pg: (game_uuid: string, page_size?: number, page_number?: number) => Promise<Message[]>;
-  create_game_session_pg: (game_uuid: string, initial_scene?: string) => Promise<string>;
-}
-
-// Realtime subscription types
-export interface RealtimePayload<T = any> {
-  schema: string;
-  table: string;
-  commit_timestamp: string;
-  eventType: 'INSERT' | 'UPDATE' | 'DELETE';
-  old: Partial<T>;
-  new: T;
-}
-
-export interface RealtimeEventTypes {
-  messages: RealtimePayload<Message>;
-  games: RealtimePayload<Game>;
-  game_players: RealtimePayload<GamePlayer>;
-  game_sessions: RealtimePayload<GameSession>;
-  characters: RealtimePayload<Character>;
-}
-
-// Helper functions for parsing JSON strings
-export function parseInventory(inventoryString: string): InventoryItem[] {
-  try {
-    return JSON.parse(inventoryString);
-  } catch {
-    return [];
+export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "13.0.5"
+  }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+  public: {
+    Tables: {
+      characters: {
+        Row: {
+          abilities: string | null
+          background: string | null
+          charisma: number
+          class: string
+          created_at: string | null
+          dexterity: number
+          experience_points: number | null
+          game_id: string | null
+          gold: number | null
+          health: number
+          id: string
+          intelligence: number
+          inventory: string | null
+          level: number | null
+          mana: number | null
+          max_health: number
+          max_mana: number | null
+          name: string
+          player_id: string | null
+          spells: string | null
+          strength: number
+          updated_at: string | null
+          wisdom: number
+        }
+        Insert: {
+          abilities?: string | null
+          background?: string | null
+          charisma: number
+          class: string
+          created_at?: string | null
+          dexterity: number
+          experience_points?: number | null
+          game_id?: string | null
+          gold?: number | null
+          health: number
+          id?: string
+          intelligence: number
+          inventory?: string | null
+          level?: number | null
+          mana?: number | null
+          max_health: number
+          max_mana?: number | null
+          name: string
+          player_id?: string | null
+          spells?: string | null
+          strength: number
+          updated_at?: string | null
+          wisdom: number
+        }
+        Update: {
+          abilities?: string | null
+          background?: string | null
+          charisma?: number
+          class?: string
+          created_at?: string | null
+          dexterity?: number
+          experience_points?: number | null
+          game_id?: string | null
+          gold?: number | null
+          health?: number
+          id?: string
+          intelligence?: number
+          inventory?: string | null
+          level?: number | null
+          mana?: number | null
+          max_health?: number
+          max_mana?: number | null
+          name?: string
+          player_id?: string | null
+          spells?: string | null
+          strength?: number
+          updated_at?: string | null
+          wisdom?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "characters_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "active_games"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "characters_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "game_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "characters_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "characters_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "player_characters"
+            referencedColumns: ["game_id"]
+          },
+          {
+            foreignKeyName: "characters_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_characters"
+            referencedColumns: ["player_id"]
+          },
+          {
+            foreignKeyName: "characters_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      devices: {
+        Row: {
+          created_at: string
+          device_fingerprint: string
+          id: string
+          ip_address: string | null
+          last_seen: string
+          user_agent: string
+        }
+        Insert: {
+          created_at?: string
+          device_fingerprint: string
+          id: string
+          ip_address?: string | null
+          last_seen?: string
+          user_agent: string
+        }
+        Update: {
+          created_at?: string
+          device_fingerprint?: string
+          id?: string
+          ip_address?: string | null
+          last_seen?: string
+          user_agent?: string
+        }
+        Relationships: []
+      }
+      game_players: {
+        Row: {
+          game_id: string
+          id: string
+          joined_at: string | null
+          player_id: string
+        }
+        Insert: {
+          game_id: string
+          id?: string
+          joined_at?: string | null
+          player_id: string
+        }
+        Update: {
+          game_id?: string
+          id?: string
+          joined_at?: string | null
+          player_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_players_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "active_games"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "game_players_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "game_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "game_players_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "game_players_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "player_characters"
+            referencedColumns: ["game_id"]
+          },
+          {
+            foreignKeyName: "game_players_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_characters"
+            referencedColumns: ["player_id"]
+          },
+          {
+            foreignKeyName: "game_players_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      game_sessions: {
+        Row: {
+          created_at: string | null
+          current_scene: string | null
+          game_id: string
+          id: string
+          is_active: boolean | null
+          session_data: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          current_scene?: string | null
+          game_id: string
+          id?: string
+          is_active?: boolean | null
+          session_data?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          current_scene?: string | null
+          game_id?: string
+          id?: string
+          is_active?: boolean | null
+          session_data?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_sessions_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "active_games"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "game_sessions_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "game_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "game_sessions_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "game_sessions_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "player_characters"
+            referencedColumns: ["game_id"]
+          },
+        ]
+      }
+      games: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          dungeon_master_id: string | null
+          id: string
+          max_players: number | null
+          name: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          dungeon_master_id?: string | null
+          id?: string
+          max_players?: number | null
+          name: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          dungeon_master_id?: string | null
+          id?: string
+          max_players?: number | null
+          name?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "games_dungeon_master_id_fkey"
+            columns: ["dungeon_master_id"]
+            isOneToOne: false
+            referencedRelation: "player_characters"
+            referencedColumns: ["player_id"]
+          },
+          {
+            foreignKeyName: "games_dungeon_master_id_fkey"
+            columns: ["dungeon_master_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          content: string
+          created_at: string | null
+          game_id: string
+          id: string
+          is_private: boolean | null
+          message_type: string | null
+          metadata: string | null
+          player_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          game_id: string
+          id?: string
+          is_private?: boolean | null
+          message_type?: string | null
+          metadata?: string | null
+          player_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          game_id?: string
+          id?: string
+          is_private?: boolean | null
+          message_type?: string | null
+          metadata?: string | null
+          player_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "active_games"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "game_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "player_characters"
+            referencedColumns: ["game_id"]
+          },
+          {
+            foreignKeyName: "messages_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_characters"
+            referencedColumns: ["player_id"]
+          },
+          {
+            foreignKeyName: "messages_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      players: {
+        Row: {
+          character_name: string
+          charisma: number
+          class: string
+          created_at: string | null
+          device_id: string
+          dexterity: number
+          experience_points: number | null
+          gold: number | null
+          health: number
+          id: string
+          intelligence: number
+          inventory: string | null
+          is_online: boolean | null
+          last_active: string | null
+          level: number | null
+          mana: number | null
+          max_health: number
+          max_mana: number | null
+          name: string
+          spells: string | null
+          strength: number
+          updated_at: string | null
+          wisdom: number
+        }
+        Insert: {
+          character_name: string
+          charisma: number
+          class: string
+          created_at?: string | null
+          device_id?: string
+          dexterity: number
+          experience_points?: number | null
+          gold?: number | null
+          health: number
+          id?: string
+          intelligence: number
+          inventory?: string | null
+          is_online?: boolean | null
+          last_active?: string | null
+          level?: number | null
+          mana?: number | null
+          max_health: number
+          max_mana?: number | null
+          name: string
+          spells?: string | null
+          strength: number
+          updated_at?: string | null
+          wisdom: number
+        }
+        Update: {
+          character_name?: string
+          charisma?: number
+          class?: string
+          created_at?: string | null
+          device_id?: string
+          dexterity?: number
+          experience_points?: number | null
+          gold?: number | null
+          health?: number
+          id?: string
+          intelligence?: number
+          inventory?: string | null
+          is_online?: boolean | null
+          last_active?: string | null
+          level?: number | null
+          mana?: number | null
+          max_health?: number
+          max_mana?: number | null
+          name?: string
+          spells?: string | null
+          strength?: number
+          updated_at?: string | null
+          wisdom?: number
+        }
+        Relationships: []
+      }
+    }
+    Views: {
+      active_games: {
+        Row: {
+          created_at: string | null
+          current_players: number | null
+          description: string | null
+          dungeon_master_id: string | null
+          id: string | null
+          max_players: number | null
+          name: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "games_dungeon_master_id_fkey"
+            columns: ["dungeon_master_id"]
+            isOneToOne: false
+            referencedRelation: "player_characters"
+            referencedColumns: ["player_id"]
+          },
+          {
+            foreignKeyName: "games_dungeon_master_id_fkey"
+            columns: ["dungeon_master_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      game_messages: {
+        Row: {
+          character_name: string | null
+          content: string | null
+          created_at: string | null
+          game_id: string | null
+          id: string | null
+          is_private: boolean | null
+          message_type: string | null
+          metadata: string | null
+          player_id: string | null
+          player_name: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "active_games"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "game_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "player_characters"
+            referencedColumns: ["game_id"]
+          },
+          {
+            foreignKeyName: "messages_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_characters"
+            referencedColumns: ["player_id"]
+          },
+          {
+            foreignKeyName: "messages_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      game_summary: {
+        Row: {
+          created_at: string | null
+          dungeon_master_name: string | null
+          id: string | null
+          max_players: number | null
+          name: string | null
+          player_count: number | null
+          status: string | null
+        }
+        Relationships: []
+      }
+      player_characters: {
+        Row: {
+          character_id: string | null
+          character_name: string | null
+          class: string | null
+          game_id: string | null
+          game_name: string | null
+          level: number | null
+          player_id: string | null
+          player_name: string | null
+        }
+        Relationships: []
+      }
+    }
+    Functions: {
+      add_experience_pg: {
+        Args: { exp_amount: number; player_uuid: string }
+        Returns: boolean
+      }
+      create_game_session_pg: {
+        Args: { game_uuid: string; initial_scene?: string }
+        Returns: string
+      }
+      generate_uuid: { Args: never; Returns: string }
+      get_game_messages_pg: {
+        Args: { game_uuid: string; page_number?: number; page_size?: number }
+        Returns: {
+          content: string
+          created_at: string
+          id: string
+          is_private: boolean
+          message_type: string
+          player_id: string
+          player_name: string
+        }[]
+      }
+      get_player_stats_pg: {
+        Args: { player_uuid: string }
+        Returns: {
+          character_name: string
+          charisma: number
+          class: string
+          dexterity: number
+          experience_points: number
+          gold: number
+          health: number
+          intelligence: number
+          level: number
+          mana: number
+          max_health: number
+          max_mana: number
+          name: string
+          strength: number
+          wisdom: number
+        }[]
+      }
+      is_game_full_pg: { Args: { game_uuid: string }; Returns: boolean }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
 }
 
-export function parseSpells(spellsString: string): Spell[] {
-  try {
-    return JSON.parse(spellsString);
-  } catch {
-    return [];
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
   }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
 }
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
 
-export function parseAbilities(abilitiesString: string): Ability[] {
-  try {
-    return JSON.parse(abilitiesString);
-  } catch {
-    return [];
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
   }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
 }
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
 
-export function parseSessionData(sessionDataString: string): Record<string, any> {
-  try {
-    return JSON.parse(sessionDataString);
-  } catch {
-    return {};
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
   }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
 }
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
 
-export function parseMetadata(metadataString: string): Record<string, any> {
-  try {
-    return JSON.parse(metadataString);
-  } catch {
-    return {};
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
   }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
 }
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
 
-// Helper functions for stringifying JSON
-export function stringifyInventory(inventory: InventoryItem[]): string {
-  return JSON.stringify(inventory);
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
 }
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
 
-export function stringifySpells(spells: Spell[]): string {
-  return JSON.stringify(spells);
-}
-
-export function stringifyAbilities(abilities: Ability[]): string {
-  return JSON.stringify(abilities);
-}
-
-export function stringifySessionData(sessionData: Record<string, any>): string {
-  return JSON.stringify(sessionData);
-}
-
-export function stringifyMetadata(metadata: Record<string, any>): string {
-  return JSON.stringify(metadata);
-}
+export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
+  public: {
+    Enums: {},
+  },
+} as const
