@@ -3,6 +3,7 @@
 
 export interface Player {
   id: string;
+  device_id: string; // Unique identifier for the device/browser
   name: string;
   character_name: string;
   class: 'Warrior' | 'Mage' | 'Rogue' | 'Cleric' | 'Paladin' | 'Ranger' | 'Bard' | 'Druid';
@@ -20,6 +21,8 @@ export interface Player {
   gold: number;
   inventory: string; // JSON string in standard SQL, can be parsed in application
   spells: string; // JSON string in standard SQL, can be parsed in application
+  last_active: string; // Track when player was last active
+  is_online: boolean; // Track if player is currently online
   created_at: string;
   updated_at: string;
 }
@@ -139,10 +142,20 @@ export interface CreateGameData {
   max_players?: number;
 }
 
+export interface Device {
+  id: string;
+  device_fingerprint: string; // Browser fingerprint
+  user_agent: string;
+  ip_address?: string;
+  last_seen: string;
+  created_at: string;
+}
+
 export interface CreatePlayerData {
   name: string;
   character_name: string;
   class: Player['class'];
+  device_id: string;
 }
 
 export interface JoinGameData {

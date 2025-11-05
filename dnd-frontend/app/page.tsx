@@ -26,7 +26,13 @@ export default function Home() {
             <Gamepad2 className="w-8 h-8 text-purple-400" />
             <h1 className="text-4xl font-bold text-white">D&D Adventure</h1>
           </div>
-          <p className="text-purple-300">Join a slot and start your adventure!</p>
+          <p className="text-purple-300 mb-4">Multiplayer D&D Game with AI Dungeon Master</p>
+          
+          {currentPlayer && (
+            <p className="text-center text-green-400 text-sm mt-2">
+              You are playing as {currentPlayer.character_name} the {currentPlayer.class}
+            </p>
+          )}
         </div>
 
         {/* Player Slots */}
@@ -37,7 +43,8 @@ export default function Home() {
                 key={slotNumber}
                 slotNumber={slotNumber}
                 player={players[slotNumber - 1]}
-                onJoinSlot={handleJoinSlot}
+                onJoinSlot={currentPlayer ? undefined : handleJoinSlot}
+                isCurrentDevice={players[slotNumber - 1]?.id === currentPlayerId}
               />
             ))}
           </div>

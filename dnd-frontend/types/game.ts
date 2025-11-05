@@ -1,6 +1,7 @@
 // Game types based on the database schema
 export interface Player {
   id: string;
+  device_id: string;
   name: string;
   character_name: string;
   class: 'Warrior' | 'Mage' | 'Rogue' | 'Cleric' | 'Paladin' | 'Ranger' | 'Bard' | 'Druid';
@@ -18,8 +19,19 @@ export interface Player {
   gold: number;
   inventory: string;
   spells: string;
+  last_active: string;
+  is_online: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface Device {
+  id: string;
+  device_fingerprint: string;
+  user_agent: string;
+  ip_address?: string;
+  last_seen: string;
+  created_at: string;
 }
 
 export interface Message {
