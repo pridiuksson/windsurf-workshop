@@ -20,6 +20,18 @@ export async function isGameFull(gameId: string, db: any): Promise<boolean> {
   return currentPlayers >= data.max_players;
 }
 
+// Helper function to get player stats by device ID
+export async function getPlayerByDevice(deviceId: string, db: any): Promise<Player | null> {
+  const { data, error } = await db
+    .from('players')
+    .select('*')
+    .eq('device_id', deviceId)
+    .single();
+  
+  if (error && error.code !== 'PGRST116') throw error; // PGRST116 is "not found"
+  return data || null;
+}
+
 // Helper function to get player stats
 export async function getPlayerStats(playerId: string, db: any): Promise<Player> {
   const { data, error } = await db
@@ -225,6 +237,78 @@ export function getLevelUpStats(levelDiff: number = 1) {
     wisdom: levelDiff * 2,
     charisma: levelDiff * 2
   };
+}
+
+// Helper function to generate device fingerprint
+export function generateDeviceFingerprint(): string {
+  // Generate a unique fingerprint based on browser characteristics
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  if (ctx) {
+    ctx.textBaseline = 'top';
+    ctx.font = '14px Arial';
+    ctx.fillText('Device fingerprint', 2, 2);
+  }
+  
+  const fingerprint = [
+    navigator.userAgent,
+    navigator.language,
+    screen.width + 'x' + screen.height,
+    new Date().getTimezoneOffset(),
+    canvas.toDataURL(),
+    Math.random().toString(36).substring(2, 15)
+  ].join('|');
+  
+  return btoa(fingerprint).replace(/[^a-zA-Z0-9]/g, '').substring(0, 32);
+}
+
+// Helper function to create or get device
+export async function createOrGetDevice(db: any): Promise<string> {
+  const deviceFingerprint = generateDeviceFingerprint();
+  
+  // Check if device already exists
+  const { data: existingDevice } = await db
+    .from('devices')
+    .select('id')
+    .eq('device_fingerprint', deviceFingerprint)
+    .single();
+  
+  if (existingDevice) {
+    // Update last_seen
+    await db
+      .from('devices')
+      .update({ last_seen: new Date().toISOString() })
+      .eq('id', existingDevice.id);
+    
+    return existingDevice.id;
+  }
+  
+  // Create new device
+  const { data, error } = await db
+    .from('devices')
+    .insert({
+      device_fingerprint: deviceFingerprint,
+      user_agent: navigator.userAgent,
+      last_seen: new Date().toISOString()
+    })
+    .select('id')
+    .single();
+  
+  if (error) throw error;
+  return data.id;
+}
+
+// Helper function to update player online status
+export async function updatePlayerOnlineStatus(playerId: string, isOnline: boolean, db: any): Promise<void> {
+  const { error } = await db
+    .from('players')
+    .update({ 
+      is_online: isOnline,
+      last_active: new Date().toISOString()
+    })
+    .eq('id', playerId);
+  
+  if (error) throw error;
 }
 
 // Helper function to create a new character with default stats

@@ -53,7 +53,7 @@ export default function ChatInterface({ messages, currentPlayerId, onSendMessage
             value={messageInput}
             onChange={(e) => setMessageInput(e.target.value)}
             placeholder="Type your message..."
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black placeholder:text-gray-500"
           />
           <button
             type="submit"
