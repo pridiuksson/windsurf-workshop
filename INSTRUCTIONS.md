@@ -6,7 +6,9 @@ Based on our deployment attempts, here's what needs to be completed:
 
 ### ⚠️ CRITICAL: Environment Variables Setup
 
-**Problem**: Vercel deployment failed because environment variables are missing.
+**CURRENT STATUS**: ❌ **BLOCKING DEPLOYMENT**
+
+**Problem**: Vercel deployment failed because Supabase environment variables are missing.
 
 **REQUIRED ENVIRONMENT VARIABLES FOR VERCEL:**
 
@@ -17,7 +19,7 @@ Go to **Vercel Dashboard** → Your Project → **Settings** → **Environment V
 NEXT_PUBLIC_SUPABASE_URL=https://rogqkxluhgaqztalxkgg.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZ3FreGx1aGdhcXp0YWx4a2dnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIzNjc4MjgsImV4cCI6MjA3Nzk0MzgyOH0.283FBJQDvcnHmeed0ilYqUo7puv_EeE8JlpplWJCQ1M
 
-# AI Dungeon Master (Gemini Flash)
+# AI Dungeon Master (Gemini Flash) - ✅ ADDED
 GEMINI_API_KEY=your_gemini_api_key_here
 
 # Optional: AI Service URL
@@ -30,7 +32,7 @@ NEXT_PUBLIC_AI_SERVICE_URL=https://your-app.vercel.app/api
 3. Copy the key (starts with `AIza...`)
 4. Add it as `GEMINI_API_KEY` in Vercel
 
-**⚠️ DEPLOYMENT WILL FAIL WITHOUT THESE VARIABLES!**
+**⚠️ DEPLOYMENT WILL FAIL WITHOUT SUPABASE VARIABLES!**
 
 ### 🗄️ Database Setup
 
@@ -59,6 +61,8 @@ NEXT_PUBLIC_AI_SERVICE_URL=https://your-app.vercel.app/api
 - Sound and visual effect suggestions
 - Combat encounter management
 - NPC dialogue handling
+
+**Status**: ✅ **READY** - Just needs environment variables to work
 
 ### 🔄 Real-time Features
 
@@ -146,25 +150,44 @@ database/
 
 ## 🚨 Known Issues
 
-1. **Environment Variables**: ⚠️ **CRITICAL** - Must add ALL 3 variables to Vercel
-   - `NEXT_PUBLIC_SUPABASE_URL` (provided above)
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` (provided above)  
-   - `GEMINI_API_KEY` (get from Google AI Studio)
-   - **Deployment will fail without these!**
+1. **Environment Variables**: ⚠️ **CRITICAL** - Missing Supabase variables in Vercel
+   - ❌ `NEXT_PUBLIC_SUPABASE_URL` (not added yet)
+   - ❌ `NEXT_PUBLIC_SUPABASE_ANON_KEY` (not added yet)  
+   - ✅ `GEMINI_API_KEY` (added to Vercel)
+   - **Deployment will fail without Supabase variables!**
 
-2. **Real-time**: WebSocket connections not tested yet
-3. **Database**: Using existing Supabase project - should work
-4. **AI Service**: ✅ **COMPLETED** - Gemini Flash integrated
+2. **Real-time**: WebSocket connections not implemented yet
+   - Players won't see each other's actions in real-time
+   - Game works but not truly multiplayer
+
+3. **Database**: Supabase project exists but frontend can't connect
+   - Schema is ready
+   - Just needs environment variables
+
+4. **AI Service**: ✅ **COMPLETED** - Gemini Flash integrated and ready
+
+## 📊 Current Feature Status
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| AI Dungeon Master | ✅ **WORKING** | Gemini Flash ready |
+| Frontend UI | ✅ **WORKING** | Beautiful interface |
+| Player Slots | ✅ **WORKING** | Can join games locally |
+| Database | ❌ **BLOCKED** | Needs Supabase env vars |
+| Chat | ⚠️ **PARTIAL** | Works but no real-time sync |
+| Deployment | ❌ **BLOCKED** | Missing Supabase env vars |
 
 ## ⚠️ DEPLOYMENT CHECKLIST
 
 Before deploying to Vercel, ensure you have:
 
-- [ ] Added `NEXT_PUBLIC_SUPABASE_URL` to Vercel environment variables
-- [ ] Added `NEXT_PUBLIC_SUPABASE_ANON_KEY` to Vercel environment variables  
-- [ ] Added `GEMINI_API_KEY` to Vercel environment variables
+- ❌ Added `NEXT_PUBLIC_SUPABASE_URL` to Vercel environment variables (**MISSING**)
+- ❌ Added `NEXT_PUBLIC_SUPABASE_ANON_KEY` to Vercel environment variables (**MISSING**)  
+- ✅ Added `GEMINI_API_KEY` to Vercel environment variables (**COMPLETED**)
 - [ ] Saved all environment variables in Vercel dashboard
 - [ ] Run `vercel --prod` from dnd-frontend directory
+
+**🚨 CURRENT BLOCKER**: Supabase environment variables must be added to Vercel before deployment can succeed!
 
 **If deployment fails, check environment variables first!**
 
